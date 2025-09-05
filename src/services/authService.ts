@@ -4,7 +4,7 @@ import axios from 'axios';
 // For local development, you can create a .env.local file in the root of your frontend
 // and add: VITE_API_URL=http://127.0.0.1:5000/api
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://mb-backend-sp95.onrender.com/'
+  baseURL: import.meta.env.VITE_API_URL || 'https://mb-backend-sp95.onrender.com/api'
 });
 
 api.interceptors.request.use((config) => {
