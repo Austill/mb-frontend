@@ -24,8 +24,17 @@ import {
   CheckCircle,
   Settings as SettingsIcon
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import api from "@/services/authService";
+import { useToast } from "@/hooks/use-toast"; 
+import { 
+  getCurrentUser, 
+  // The following are placeholders for functions you'll need to create
+  // updateProfile, 
+  // updateSettings, 
+  // changePassword, 
+  // exportData, 
+  // deleteAccount 
+} from "@/services/authService";
+import api from "@/services/authService"; // Keep for now, but aim to replace direct `api` calls
 
 interface UserProfile {
   id: string;
@@ -93,11 +102,11 @@ export default function Settings() {
     try {
       setIsLoading(true);
       // Load user profile
-      const profileResponse = await api.get('/auth/profile');
-      setProfile(profileResponse.data);
+      const userProfile = await getCurrentUser();
+      setProfile(userProfile);
 
-      // Load user settings
-      const settingsResponse = await api.get('/user/settings');
+      // TODO: Create a `getSettings` function in authService.ts and use it here
+      const settingsResponse = await api.get('/api/user/settings');
       if (settingsResponse.data) {
         setSettings(settingsResponse.data);
       }
@@ -116,7 +125,8 @@ export default function Settings() {
   const handleProfileUpdate = async (updatedProfile: Partial<UserProfile>) => {
     try {
       setIsSaving(true);
-      await api.put('/user/profile', updatedProfile);
+      // TODO: Create an `updateProfile` function in authService.ts and use it here
+      await api.put('/api/user/profile', updatedProfile);
       setProfile(prev => prev ? { ...prev, ...updatedProfile } : null);
       toast({
         title: "Success",
@@ -138,7 +148,8 @@ export default function Settings() {
     try {
       setIsSaving(true);
       const newSettings = { ...settings, ...updatedSettings };
-      await api.put('/user/settings', newSettings);
+      // TODO: Create an `updateSettings` function in authService.ts and use it here
+      await api.put('/api/user/settings', newSettings);
       setSettings(newSettings);
       toast({
         title: "Success",
@@ -177,7 +188,8 @@ export default function Settings() {
 
     try {
       setIsSaving(true);
-      await api.put('/auth/change-password', {
+      // TODO: Create a `changePassword` function in authService.ts and use it here
+      await api.put('/api/auth/change-password', {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
       });
@@ -206,7 +218,8 @@ export default function Settings() {
 
   const handleDataExport = async () => {
     try {
-      const response = await api.get('/user/export-data', {
+      // TODO: Create an `exportData` function in authService.ts and use it here
+      const response = await api.get('/api/user/export-data', {
         responseType: 'blob'
       });
       
@@ -248,7 +261,8 @@ export default function Settings() {
     if (!doubleConfirm) return;
 
     try {
-      await api.delete('/user/account');
+      // TODO: Create a `deleteAccount` function in authService.ts and use it here
+      await api.delete('/api/user/account');
       toast({
         title: "Account Deleted",
         description: "Your account has been permanently deleted"

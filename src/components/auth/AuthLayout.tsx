@@ -48,8 +48,7 @@ export default function AuthLayout({ onAuthSuccess }: AuthLayoutProps) {
         toast({ title: "Success", description: "Account created successfully! Please sign in." });
         toggleAuthMode();
       } else {
-        const { token } = await login({ email: formData.email, password: formData.password });
-        localStorage.setItem("token", token);
+        await login({ email: formData.email, password: formData.password });
         toast({ title: "Success", description: "Signed in successfully." });
         onAuthSuccess();
       }

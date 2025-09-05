@@ -7,37 +7,53 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AuthLayout from "./components/auth/AuthLayout";
+import { checkAuth, logout } from "./services/authService";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in (check localStorage, session, etc.)
-    const savedAuth = localStorage.getItem('isAuthenticated');
-    const savedPremium = localStorage.getItem('isPremium');
-    
-    if (savedAuth === 'true') {
-      setIsAuthenticated(true);
-    }
-    if (savedPremium === 'true') {
-      setIsPremium(true);
-    }
+    const verifyAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const user = await checkAuth();
+          if (user) {
+            setIsAuthenticated(true);
+            // You can also set user details or premium status here from the `user` object
+            // setIsPremium(user.isPremium);
+          }
+        } catch (error) {
+          console.error("Auth check failed, token might be expired.", error);
+          logout(); // Token is invalid, so log out
+        }
+      }
+      setIsAuthLoading(false);
+    };
+    verifyAuth();
   }, []);
 
   const handleAuthSuccess = () => {
     setIsAuthenticated(true);
-    localStorage.setItem('isAuthenticated', 'true');
   };
 
   const handleSignOut = () => {
-    setIsAuthenticated(false);
-    setIsPremium(false);
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('isPremium');
+    logout();
+    // The logout function will redirect and cause a reload,
+    // which will reset the application state.
   };
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[hsl(var(--wellness-primary))]"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
