@@ -2,7 +2,7 @@ import axios from "axios";
 
 // ✅ Axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://mb-backend-sp95.onrender.com/'
+  baseURL: import.meta.env.VITE_API_URL || "https://mb-backend-sp95.onrender.com/api",
 });
 
 // ✅ Attach token to requests
