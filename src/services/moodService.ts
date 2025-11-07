@@ -1,3 +1,4 @@
+// src/services/moodService.ts
 import api from './authService';
 
 export interface MoodEntry {
@@ -33,10 +34,25 @@ export interface UpdateMoodEntryData {
   triggers?: string[];
 }
 
+// normalize backend -> frontend (snake_case -> camelCase)
+const normalizeMood = (raw: any): MoodEntry => {
+  return {
+    id: raw.id || raw._id,
+    userId: raw.userId || raw.user_id,
+    moodLevel: raw.moodLevel ?? raw.mood_level,
+    emoji: raw.emoji,
+    note: raw.note,
+    triggers: raw.triggers || [],
+    createdAt: raw.createdAt || raw.created_at,
+    updatedAt: raw.updatedAt || raw.updated_at,
+  };
+};
+
 // Create a new mood entry
 export const createMoodEntry = async (data: CreateMoodEntryData): Promise<MoodEntry> => {
   const response = await api.post('/mood/entries', data);
-  return response.data.entry;
+  // backend returns { message, entry }
+  return normalizeMood(response.data.entry);
 };
 
 // Get mood entries with pagination and filtering
@@ -51,19 +67,28 @@ export const getMoodEntries = async (params?: {
   offset: number;
 }> => {
   const response = await api.get('/mood/entries', { params });
-  return response.data;
+  const payload = response.data;
+  return {
+    entries: (payload.entries || []).map((e: any) => normalizeMood(e)),
+    total: payload.total,
+    limit: payload.limit,
+    offset: payload.offset,
+  };
 };
 
 // Get a specific mood entry
 export const getMoodEntry = async (entryId: string): Promise<MoodEntry> => {
   const response = await api.get(`/mood/entries/${entryId}`);
-  return response.data.entry;
+  return normalizeMood(response.data.entry);
 };
 
 // Update a mood entry
-export const updateMoodEntry = async (entryId: string, data: UpdateMoodEntryData): Promise<MoodEntry> => {
+export const updateMoodEntry = async (
+  entryId: string,
+  data: UpdateMoodEntryData
+): Promise<MoodEntry> => {
   const response = await api.put(`/mood/entries/${entryId}`, data);
-  return response.data.entry;
+  return normalizeMood(response.data.entry);
 };
 
 // Delete a mood entry
@@ -83,11 +108,17 @@ export const getTodayMood = async (): Promise<{
   entry?: MoodEntry;
 }> => {
   const response = await api.get('/mood/today');
-  return response.data;
+  if (response.data.entry) {
+    return {
+      hasEntry: true,
+      entry: normalizeMood(response.data.entry),
+    };
+  }
+  return { hasEntry: false };
 };
 
-// Get recent mood entries (last 7 days)
+// Get recent mood entries (last 30 days)
 export const getRecentMoodEntries = async (): Promise<MoodEntry[]> => {
-  const response = await getMoodEntries({ limit: 10, days: 7 });
+  const response = await getMoodEntries({ limit: 10, days: 30 });
   return response.entries;
 };

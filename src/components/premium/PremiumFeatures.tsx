@@ -79,7 +79,7 @@ export default function PremiumFeatures({ isPremium = false }: PremiumFeaturesPr
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {premiumFeatures.map((feature, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 rounded-lg bg-background/50">
+              <div key={`premium-feature-${feature.title}-${index}`} className="flex items-start space-x-3 p-3 rounded-lg bg-background/50">
                 <feature.icon className="w-5 h-5 text-[hsl(var(--wellness-primary))] mt-1 flex-shrink-0" />
                 <div>
                   <h4 className="font-medium">{feature.title}</h4>
@@ -106,7 +106,7 @@ export default function PremiumFeatures({ isPremium = false }: PremiumFeaturesPr
       {/* Premium Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {premiumFeatures.map((feature, index) => (
-          <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
+          <Card key={`feature-card-${feature.title}-${index}`} className="p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center mb-4">
               <div className="p-2 rounded-lg bg-[hsl(var(--wellness-primary)/0.1)] mr-3">
                 <feature.icon className="w-6 h-6 text-[hsl(var(--wellness-primary))]" />
@@ -130,8 +130,8 @@ export default function PremiumFeatures({ isPremium = false }: PremiumFeaturesPr
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {pricingPlans.map((plan, index) => (
-            <Card 
-              key={index} 
+            <Card
+              key={`pricing-plan-${plan.id}-${index}`}
               className={`p-6 relative ${
                 plan.popular 
                   ? 'border-[hsl(var(--wellness-primary))] shadow-lg scale-105' 
@@ -166,7 +166,7 @@ export default function PremiumFeatures({ isPremium = false }: PremiumFeaturesPr
 
               <div className="space-y-3 mb-6">
                 {premiumFeatures.slice(0, 4).map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center text-sm">
+                  <div key={`plan-feature-${plan.id}-${feature.title}-${featureIndex}`} className="flex items-center text-sm">
                     <Check className="w-4 h-4 text-[hsl(var(--wellness-primary))] mr-2 flex-shrink-0" />
                     <span>{feature.title}</span>
                   </div>

@@ -99,27 +99,8 @@ export default function Settings() {
   }, []);
 
   const loadUserData = async () => {
-    try {
-      setIsLoading(true);
-      // Load user profile
-      const userProfile = await getCurrentUser();
-      setProfile(userProfile);
-
-      // TODO: Create a `getSettings` function in authService.ts and use it here
-      const settingsResponse = await api.get('/api/user/settings');
-      if (settingsResponse.data) {
-        setSettings(settingsResponse.data);
-      }
-    } catch (error) {
-      console.error('Failed to load user data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load user settings",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // Skip - backend endpoints not ready
+    setIsLoading(false);
   };
 
   const handleProfileUpdate = async (updatedProfile: Partial<UserProfile>) => {

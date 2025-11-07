@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input, InputProps } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react";
-import sereniTreeImage from "@/assets/serenity-tree.png";
+import { Eye, EyeOff, Mail, Lock, User, Phone, Leaf } from "lucide-react";
 import { login, register } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
 
@@ -83,29 +82,17 @@ export default function AuthLayout({ onAuthSuccess }: AuthLayoutProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: `url(${sereniTreeImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        <div className="absolute inset-0 bg-black/40 dark:bg-black/60"></div>
-      </div>
+      {/* Background Gradient */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-[hsl(var(--wellness-primary)/0.1)] via-background to-[hsl(var(--wellness-secondary)/0.1)]"></div>
       
       {/* Auth Card */}
       <Card className="w-full max-w-md mx-4 p-8 backdrop-blur-sm bg-background/95 border-border/50 relative z-10">
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <img 
-              src={sereniTreeImage} 
-              alt="SereniTree Logo" 
-              className="w-12 h-12 rounded-full object-cover mr-3"
-            />
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] flex items-center justify-center mr-3">
+              <Leaf className="w-7 h-7 text-white" />
+            </div>
             <h1 className="text-4xl font-serif font-bold bg-gradient-to-r from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] bg-clip-text text-transparent">
               SereniTree
             </h1>

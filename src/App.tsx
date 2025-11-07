@@ -72,7 +72,8 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        {/* FIX: added future flags to silence v7 upgrade warnings (safe to ignore) */}
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route 
               path="/" 

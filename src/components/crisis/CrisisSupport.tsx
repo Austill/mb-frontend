@@ -235,7 +235,7 @@ export default function CrisisSupport() {
           <h3 className="font-semibold mb-4 text-center">Quick Coping Strategies</h3>
           <div className="grid gap-3 md:grid-cols-2">
             {copingStrategies.map((strategy, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30">
+              <div key={`coping-strategy-${strategy.title}-${index}`} className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30">
                 <div className="text-[hsl(var(--wellness-primary))] mt-0.5">
                   {strategy.icon}
                 </div>

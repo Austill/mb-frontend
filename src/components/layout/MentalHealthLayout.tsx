@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, Settings as SettingsIcon, Heart, BookOpen, Brain, Phone, BarChart3, Crown, LogOut } from "lucide-react";
+import { Menu, X, Settings as SettingsIcon, Heart, BookOpen, Brain, Phone, BarChart3, Crown, LogOut, Leaf } from "lucide-react";
 import MoodTracker from "@/components/mood/MoodTracker";
 import Journal from "@/components/journal/Journal";
 import Meditation from "@/components/meditation/Meditation";
@@ -10,7 +10,6 @@ import ProgressDashboard from "@/components/progress/ProgressDashboard";
 import PremiumFeatures from "@/components/premium/PremiumFeatures";
 import Settings from "@/components/settings/Settings";
 import ThemeToggle from "@/components/theme/ThemeToggle";
-import sereniTreeImage from "@/assets/serenity-tree.png";
 import { Outlet } from "react-router-dom";
 
 interface NavItem {
@@ -46,11 +45,9 @@ export default function MentalHealthLayout({ onSignOut, isPremium = false }: Men
         {/* Header */}
         <header className="bg-background border-b border-border px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <img 
-              src={sereniTreeImage} 
-              alt="SereniTree Logo" 
-              className="w-8 h-8 rounded-full object-cover"
-            />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] flex items-center justify-center">
+              <Leaf className="w-5 h-5 text-white" />
+            </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] bg-clip-text text-transparent">
               SereniTree
             </h1>
@@ -87,7 +84,7 @@ export default function MentalHealthLayout({ onSignOut, isPremium = false }: Men
           <div className="md:hidden bg-background border-b border-border">
             <div className="flex flex-col">
               {navItems.map((item) => (
-                <div key={item.id}>
+                <div key={`mobile-nav-${item.id}`}>
                   <button
                     onClick={() => {
                       setActiveTab(item.id);
@@ -117,7 +114,7 @@ export default function MentalHealthLayout({ onSignOut, isPremium = false }: Men
             <div className="flex space-x-1">
               {navItems.map((item) => (
                 <button
-                  key={item.id}
+                  key={`desktop-nav-${item.id}`}
                   onClick={() => setActiveTab(item.id)}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors relative ${
                     activeTab === item.id

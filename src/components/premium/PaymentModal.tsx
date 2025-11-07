@@ -183,7 +183,7 @@ export default function PaymentModal({ isOpen, onClose, plan, onPaymentSuccess }
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {paymentMethods.map((method) => (
                 <Card
-                  key={method.id}
+                  key={`payment-method-${method.id}`}
                   className={`p-4 cursor-pointer transition-all ${
                     selectedMethod === method.id
                       ? 'border-[hsl(var(--wellness-primary))] bg-[hsl(var(--wellness-primary)/0.05)]'
@@ -198,7 +198,7 @@ export default function PaymentModal({ isOpen, onClose, plan, onPaymentSuccess }
                       <p className="text-sm text-muted-foreground mb-2">{method.description}</p>
                       <div className="flex flex-wrap gap-1">
                         {method.supported.map((support) => (
-                          <Badge key={support} variant="secondary" className="text-xs">
+                          <Badge key={`support-${method.id}-${support}`} variant="secondary" className="text-xs">
                             {support}
                           </Badge>
                         ))}
