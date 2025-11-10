@@ -5,7 +5,7 @@ import { AuthResponse, User } from "@/types";
 // FIX: use relative /api path so Vite proxy can intercept and forward to backend
 // In production, use full URL from environment variable
 const api = axios.create({
-  baseURL: import.meta.env.DEV ? "/api" : (import.meta.env.VITE_API_URL || "https://mb-backend-sp95.onrender.com,http://localhost:5000/api"),
+  baseURL: import.meta.env.DEV ? "/api" : (import.meta.env.VITE_API_URL || "https://mb-backend-sp95.onrender.com/api"),
 });
 
 // ✅ Attach token to requests
