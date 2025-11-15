@@ -81,3 +81,32 @@ export const checkAuth = async (): Promise<User | null> => {
   const response = await api.get<User>("/auth/profile");
   return response.data;
 };
+
+// =======================
+// Additional user helpers used by Settings
+// =======================
+
+export const updateProfile = async (payload: Partial<User>): Promise<User> => {
+  const response = await api.put('/user/profile', payload);
+  return response.data;
+};
+
+export const updateSettings = async (payload: any): Promise<any> => {
+  const response = await api.put('/user/settings', payload);
+  return response.data;
+};
+
+export const changePassword = async (data: { currentPassword: string; newPassword: string }) => {
+  const response = await api.put('/auth/change-password', data);
+  return response.data;
+};
+
+export const exportUserData = async () => {
+  const response = await api.get('/user/export-data', { responseType: 'blob' });
+  return response;
+};
+
+export const deleteAccount = async () => {
+  const response = await api.delete('/user/account');
+  return response.data;
+};

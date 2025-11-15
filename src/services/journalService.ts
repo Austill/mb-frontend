@@ -13,14 +13,16 @@ const normalizeJournal = (raw: any): JournalEntry => {
     // keep backend names your components already use
     created_at: raw.createdAt || raw.created_at,
     updated_at: raw.updatedAt || raw.updated_at,
-  };
+  } as any;
 };
 
 // GET /journal/entries
 export const getJournalEntries = async (): Promise<JournalEntry[]> => {
   const response = await api.get('/journal/entries');
-  const data = response.data || [];
-  return data.map((item: any) => normalizeJournal(item));
+  // backend may return { entries: [...] } or just an array
+  const data = response.data;
+  const items = Array.isArray(data) ? data : data?.entries || [];
+  return items.map((item: any) => normalizeJournal(item));
 };
 
 // POST /journal/entries
@@ -30,7 +32,10 @@ export const createJournalEntry = async (entry: {
   isPrivate: boolean;
 }): Promise<JournalEntry> => {
   const response = await api.post('/journal/entries', entry);
-  return normalizeJournal(response.data);
+  // backend may return { entry } or the created object directly
+  const data = response.data;
+  const raw = data?.entry || data;
+  return normalizeJournal(raw);
 };
 
 // GET /journal/entries/:id

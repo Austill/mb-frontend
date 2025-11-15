@@ -24,17 +24,9 @@ import {
   CheckCircle,
   Settings as SettingsIcon
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast"; 
-import { 
-  getCurrentUser, 
-  // The following are placeholders for functions you'll need to create
-  // updateProfile, 
-  // updateSettings, 
-  // changePassword, 
-  // exportData, 
-  // deleteAccount 
-} from "@/services/authService";
-import api from "@/services/authService"; // Keep for now, but aim to replace direct `api` calls
+import { useToast } from "@/hooks/use-toast";
+import useUser from '@/hooks/useUser';
+import { updateSettings as apiUpdateSettings } from '@/services/authService';
 
 interface UserProfile {
   id: string;
@@ -95,31 +87,26 @@ export default function Settings() {
   });
 
   useEffect(() => {
-    loadUserData();
+    // load user profile via hook
+    (async () => {
+      await refresh();
+    })();
   }, []);
 
   const loadUserData = async () => {
-    // Skip - backend endpoints not ready
+    // kept for backwards compat - prefer useUser hook
     setIsLoading(false);
   };
+
+  const { user, refresh, updateProfile, changePassword: hookChangePassword, exportData, removeAccount } = useUser();
 
   const handleProfileUpdate = async (updatedProfile: Partial<UserProfile>) => {
     try {
       setIsSaving(true);
-      // TODO: Create an `updateProfile` function in authService.ts and use it here
-      await api.put('/api/user/profile', updatedProfile);
-      setProfile(prev => prev ? { ...prev, ...updatedProfile } : null);
-      toast({
-        title: "Success",
-        description: "Profile updated successfully"
-      });
-    } catch (error) {
-      console.error('Failed to update profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update profile",
-        variant: "destructive"
-      });
+      const updated = await updateProfile(updatedProfile as any);
+      setProfile((prev) => (prev ? { ...prev, ...(updated as any) } : (updated as any)));
+    } catch (err) {
+      // handled in hook
     } finally {
       setIsSaving(false);
     }
@@ -129,20 +116,12 @@ export default function Settings() {
     try {
       setIsSaving(true);
       const newSettings = { ...settings, ...updatedSettings };
-      // TODO: Create an `updateSettings` function in authService.ts and use it here
-      await api.put('/api/user/settings', newSettings);
+      await apiUpdateSettings(newSettings);
       setSettings(newSettings);
-      toast({
-        title: "Success",
-        description: "Settings updated successfully"
-      });
-    } catch (error) {
-      console.error('Failed to update settings:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update settings",
-        variant: "destructive"
-      });
+      toast({ title: 'Success', description: 'Settings updated successfully' });
+    } catch (err) {
+      console.error('Failed to update settings:', err);
+      toast({ title: 'Error', description: 'Failed to update settings', variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
@@ -169,29 +148,11 @@ export default function Settings() {
 
     try {
       setIsSaving(true);
-      // TODO: Create a `changePassword` function in authService.ts and use it here
-      await api.put('/api/auth/change-password', {
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword
-      });
-      
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
-      
-      toast({
-        title: "Success",
-        description: "Password changed successfully"
-      });
-    } catch (error) {
-      console.error('Failed to change password:', error);
-      toast({
-        title: "Error",
-        description: "Failed to change password. Please check your current password.",
-        variant: "destructive"
-      });
+      await hookChangePassword({ currentPassword: passwordData.currentPassword, newPassword: passwordData.newPassword });
+
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      // handled by hook
     } finally {
       setIsSaving(false);
     }
@@ -199,11 +160,7 @@ export default function Settings() {
 
   const handleDataExport = async () => {
     try {
-      // TODO: Create an `exportData` function in authService.ts and use it here
-      const response = await api.get('/api/user/export-data', {
-        responseType: 'blob'
-      });
-      
+      const response = await exportData();
       const blob = new Blob([response.data], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -213,11 +170,7 @@ export default function Settings() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
-      toast({
-        title: "Success",
-        description: "Your data has been exported successfully"
-      });
+      toast({ title: 'Success', description: 'Your data has been exported successfully' });
     } catch (error) {
       console.error('Failed to export data:', error);
       toast({
@@ -242,21 +195,10 @@ export default function Settings() {
     if (!doubleConfirm) return;
 
     try {
-      // TODO: Create a `deleteAccount` function in authService.ts and use it here
-      await api.delete('/api/user/account');
-      toast({
-        title: "Account Deleted",
-        description: "Your account has been permanently deleted"
-      });
-      // Redirect to login or home page
+      await removeAccount();
       window.location.href = '/';
-    } catch (error) {
-      console.error('Failed to delete account:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete account",
-        variant: "destructive"
-      });
+    } catch (err) {
+      // handled by hook
     }
   };
 

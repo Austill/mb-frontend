@@ -8,13 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Calendar, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  createMoodEntry,
-  getRecentMoodEntries,
-  getTodayMood,
-  type MoodEntry as APIMoodEntry,
-  type CreateMoodEntryData,
-} from "@/services/moodService";
+import useMood from "@/hooks/useMood";
+import type { CreateMoodEntryData } from "@/services/moodService";
 
 interface MoodEntry extends APIMoodEntry {
   dateObj: Date;
@@ -48,60 +43,31 @@ export default function MoodTracker() {
   const [note, setNote] = useState("");
   const [selectedTriggers, setSelectedTriggers] = useState<string[]>([]);
   const [customTrigger, setCustomTrigger] = useState("");
-  const [recentEntries, setRecentEntries] = useState<MoodEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [todayEntry, setTodayEntry] = useState<MoodEntry | null>(null);
+
+  const { todayEntry, recentEntries, isLoading, isSaving, saveMood, load } = useMood();
   const [animatingMood, setAnimatingMood] = useState<number | null>(null);
+  
 
   useEffect(() => {
-    loadData();
+    // initial load handled by hook, ensure UI sync
+    if (!todayEntry && !recentEntries) {
+      load();
+    }
   }, []);
 
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-
-      // 1) recent entries (normalized)
-      const entries = await getRecentMoodEntries();
-      const mapped: MoodEntry[] = entries.map((entry) => ({
-        ...entry,
-        dateObj: new Date(entry.createdAt || Date.now()),
-        mood: entry.moodLevel,
-      }));
-      setRecentEntries(mapped);
-
-      // 2) today's entry
-      const todayData = await getTodayMood();
-      if (todayData.hasEntry && todayData.entry) {
-        const entry = todayData.entry;
-        const mappedToday: MoodEntry = {
-          ...entry,
-          dateObj: new Date(entry.createdAt || Date.now()),
-          mood: entry.moodLevel,
-        };
-        setTodayEntry(mappedToday);
-        setCurrentMood([entry.moodLevel]);
-        setNote(entry.note || "");
-        setSelectedTriggers(entry.triggers || []);
-      } else {
-        // Reset to default if no today's entry
-        setTodayEntry(null);
-        setCurrentMood([3]); // Default to neutral
-        setNote("");
-        setSelectedTriggers([]);
-      }
-    } catch (error) {
-      console.error("Failed to load mood data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load mood data. Please refresh the page.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+  // sync local fields when hook's todayEntry changes
+  useEffect(() => {
+    if (todayEntry) {
+      // parenthesis required when mixing ?? with ||
+      setCurrentMood([(todayEntry.moodLevel ?? (todayEntry as any).mood) || 3]);
+      setNote(todayEntry.note || "");
+      setSelectedTriggers(todayEntry.triggers || []);
+    } else {
+      setCurrentMood([3]);
+      setNote("");
+      setSelectedTriggers([]);
     }
-  };
+  }, [todayEntry]);
 
   const currentMoodData =
     moodEmojis.find((m) => m.value === currentMood[0]) || moodEmojis[2];
@@ -132,14 +98,9 @@ export default function MoodTracker() {
     }
 
     try {
-      setIsSaving(true);
-
-      // final triggers
-      let finalTriggers = [...selectedTriggers];
-      if (selectedTriggers.includes("Other") && customTrigger.trim()) {
-        finalTriggers = finalTriggers.filter((t) => t !== "Other");
-        finalTriggers.push(customTrigger.trim());
-      }
+      const finalTriggers = selectedTriggers.includes('Other') && customTrigger.trim()
+        ? [...selectedTriggers.filter((t) => t !== 'Other'), customTrigger.trim()]
+        : selectedTriggers;
 
       const payload: CreateMoodEntryData = {
         moodLevel: currentMood[0],
@@ -148,39 +109,10 @@ export default function MoodTracker() {
         triggers: finalTriggers.length > 0 ? finalTriggers : undefined,
       };
 
-      const saved = await createMoodEntry(payload);
-
-      const newEntry: MoodEntry = {
-        ...saved,
-        dateObj: new Date(saved.createdAt || Date.now()),
-        mood: saved.moodLevel,
-      };
-
-      // update today's entry
-      setTodayEntry(newEntry);
-
-      // put on top of recent entries, dedupe, limit 10
-      setRecentEntries((prev) => {
-        const filtered = prev.filter((e) => e.id !== newEntry.id);
-        return [newEntry, ...filtered].slice(0, 10);
-      });
-
-      // reset extra fields
-      setCustomTrigger("");
-
-      toast({
-        title: "Success",
-        description: "Mood entry saved successfully!",
-      });
-    } catch (error) {
-      console.error("Failed to save mood entry:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save mood entry. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
+      await saveMood(payload);
+      setCustomTrigger('');
+    } catch (err) {
+      // saveMood handles toasts and reloads
     }
   };
 
@@ -338,7 +270,7 @@ export default function MoodTracker() {
           </Button>
         </div>
 
-        {isLoading ? (
+          {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--wellness-primary))]" />
             <span className="ml-2 text-muted-foreground">Loading recent entries...</span>

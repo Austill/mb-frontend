@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { getDailyInsight, type WellnessInsight } from "@/services/aiService";
-import { getMoodEntries } from "@/services/moodService";
-import { getJournalEntries } from "@/services/journalService";
+import useProgress from '@/hooks/useProgress';
 import {
   TrendingUp,
   TrendingDown,
@@ -24,61 +23,17 @@ interface MoodData {
 export default function ProgressDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "year">("week");
   const [dailyInsight, setDailyInsight] = useState<WellnessInsight | null>(null);
-  const [moodData, setMoodData] = useState<MoodData[]>([]);
-  const [journalCount, setJournalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLoading, stats, loadAll } = useProgress();
+  const { moodEntries, journalEntries } = (stats || {}) as any;
   const { toast } = useToast();
 
   useEffect(() => {
-    loadAllData();
+    loadAll();
+    loadDailyInsight();
   }, []);
 
-  const loadAllData = async () => {
-    setIsLoading(true);
-    try {
-      await Promise.all([
-        loadDailyInsight(),
-        loadMoodData(),
-        loadJournalData(),
-      ]);
-    } catch (error) {
-      console.error("Failed to load dashboard data:", error);
-      toast({
-        title: "Error",
-        description: "Could not load progress data.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // ✅ use the normalized mood service (createdAt, moodLevel, note)
-  const loadMoodData = async () => {
-    try {
-      const response = await getMoodEntries();
-      const entries = response.entries || [];
-      const formattedData: MoodData[] = entries.map((entry: any) => ({
-        date: entry.createdAt,
-        mood: entry.moodLevel,
-        note: entry.note,
-      }));
-      setMoodData(formattedData);
-    } catch (error) {
-      console.error("Failed to load mood data:", error);
-      setMoodData([]);
-    }
-  };
-
-  const loadJournalData = async () => {
-    try {
-      const entries = await getJournalEntries();
-      setJournalCount(entries.length);
-    } catch (error) {
-      console.error("Failed to load journal data:", error);
-      setJournalCount(0);
-    }
-  };
+  // mood and journal data come from useProgress.stats
 
   // ✅ actually call the backend insights endpoint
   const loadDailyInsight = async () => {
@@ -93,18 +48,10 @@ export default function ProgressDashboard() {
   };
 
   // Calculate mood stats
-  const averageMood =
-    moodData.length > 0
-      ? moodData.reduce((sum, data) => sum + data.mood, 0) / moodData.length
-      : 0;
-
-  const moodTrend =
-    moodData.length >= 2
-      ? moodData[moodData.length - 1].mood - moodData[0].mood
-      : 0;
-
-  const checkInStreak = moodData.length;
-  const journalStreak = journalCount;
+  const averageMood = stats?.averageMood ?? 0;
+  const moodTrend = (stats?.moodEntries?.length && stats.moodEntries[stats.moodEntries.length - 1].moodLevel - stats.moodEntries[0].moodLevel) || 0;
+  const checkInStreak = stats?.moodEntries?.length ?? 0;
+  const journalStreak = stats?.totalJournalEntries ?? 0;
 
   const getMoodColor = (mood: number) => {
     if (mood >= 4.5) return "hsl(var(--mood-excellent))";

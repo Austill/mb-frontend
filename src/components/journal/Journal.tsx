@@ -23,14 +23,12 @@ import {
   Loader2
 } from "lucide-react";
 import { JournalEntry } from "@/types";
-import { getJournalEntries, createJournalEntry } from "@/services/journalService";
+import useJournal from '@/hooks/useJournal';
 import { analyzeSentiment, analyzeJournalEntry } from "@/services/aiService";
 import SentimentDisplay from "@/components/ai/SentimentDisplay";
 
 export default function Journal() {
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const { entries, isLoading, isSaving, load, createEntry } = useJournal();
   const [currentEntry, setCurrentEntry] = useState({
     title: "",
     content: "",
@@ -45,7 +43,8 @@ export default function Journal() {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchEntries();
+    // hook already loads entries on mount; ensure we have latest
+    load();
   }, []);
 
   const filteredEntries = entries.filter(entry =>
@@ -53,23 +52,7 @@ export default function Journal() {
     entry.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const fetchEntries = async () => {
-    setIsLoading(true);
-    try {
-      const fetchedEntries = await getJournalEntries();
-      setEntries(fetchedEntries);
-      setSearchTerm(""); // Reset search when fetching new entries
-    } catch (error) {
-      console.error("Error fetching journal entries:", error);
-      toast({
-        title: "Error",
-        description: "Could not fetch journal entries.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // fetch handled by hook
 
   const handleSaveEntry = async () => {
     if (!currentEntry.title.trim() || !currentEntry.content.trim()) {
@@ -80,28 +63,13 @@ export default function Journal() {
       });
       return;
     }
-    setIsSaving(true);
     try {
-      const savedEntry = await createJournalEntry(currentEntry);
-
-      // Show success toast only after successful save
-      toast({
-        title: "Success",
-        description: "Journal entry saved successfully!",
-      });
-
-      setCurrentEntry({ title: "", content: "", isPrivate: false });
+      const saved = await createEntry(currentEntry);
+      toast({ title: 'Success', description: 'Journal entry saved successfully!' });
+      setCurrentEntry({ title: '', content: '', isPrivate: false });
       setIsWriting(false);
-      fetchEntries(); // Refetch entries to show the new one
-    } catch (error) {
-      console.error("Error saving journal entry:", error);
-      toast({
-        title: "Error",
-        description: "Could not save journal entry.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
+    } catch (err) {
+      // createEntry handles toast and reloads
     }
   };
 
