@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Mail, Lock, User, Phone, Leaf } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react";
+import sereniTreeImage from "@/assets/serenity-tree.png";
 import { login, register } from "@/services/authService";
 import { useToast } from "@/hooks/use-toast";
 
@@ -81,17 +82,30 @@ export default function AuthLayout({ onAuthSuccess }: AuthLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Background Gradient */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-[hsl(var(--wellness-primary)/0.1)] via-background to-[hsl(var(--wellness-secondary)/0.1)]"></div>
+      
+      {/* Full Page Watermark Background */}
+      <div className="absolute inset-0 z-1 pointer-events-none">
+        <img
+          src={sereniTreeImage}
+          alt="Background Watermark"
+          className="w-full h-full object-cover opacity-30"
+        />
+      </div>
       
       {/* Auth Card */}
       <Card className="w-full max-w-md mx-4 p-8 backdrop-blur-sm bg-background/95 border-border/50 relative z-10">
         {/* Logo and Title */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] flex items-center justify-center mr-3">
-              <Leaf className="w-7 h-7 text-white" />
+          <div className="flex flex-col items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] flex items-center justify-center mb-3 overflow-hidden">
+              <img
+                src={sereniTreeImage}
+                alt="SereniTree Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
             <h1 className="text-4xl font-serif font-bold bg-gradient-to-r from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] bg-clip-text text-transparent">
               SereniTree

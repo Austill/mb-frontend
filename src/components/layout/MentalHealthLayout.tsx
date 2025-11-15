@@ -1,7 +1,21 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, Settings as SettingsIcon, Heart, BookOpen, Brain, Phone, BarChart3, Crown, LogOut, Leaf } from "lucide-react";
+import ThemeToggle from "@/components/theme/ThemeToggle";
+import {
+  Heart,
+  BookOpen,
+  Brain,
+  Phone,
+  BarChart3,
+  Crown,
+  Settings as SettingsIcon,
+  LogOut,
+  Menu,
+  X
+} from "lucide-react";
+import sereniTreeImage from "@/assets/serenity-tree.png";
 import MoodTracker from "@/components/mood/MoodTracker";
 import Journal from "@/components/journal/Journal";
 import Meditation from "@/components/meditation/Meditation";
@@ -9,8 +23,6 @@ import CrisisSupport from "@/components/crisis/CrisisSupport";
 import ProgressDashboard from "@/components/progress/ProgressDashboard";
 import PremiumFeatures from "@/components/premium/PremiumFeatures";
 import Settings from "@/components/settings/Settings";
-import ThemeToggle from "@/components/theme/ThemeToggle";
-import { Outlet } from "react-router-dom";
 
 interface NavItem {
   id: string;
@@ -45,8 +57,12 @@ export default function MentalHealthLayout({ onSignOut, isPremium = false }: Men
         {/* Header */}
         <header className="bg-background border-b border-border px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] flex items-center justify-center">
-              <Leaf className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] flex items-center justify-center overflow-hidden">
+              <img
+                src={sereniTreeImage}
+                alt="SereniTree Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-[hsl(var(--wellness-primary))] to-[hsl(var(--wellness-secondary))] bg-clip-text text-transparent">
               SereniTree
