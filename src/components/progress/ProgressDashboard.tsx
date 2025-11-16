@@ -25,6 +25,13 @@ export default function ProgressDashboard() {
   const [dailyInsight, setDailyInsight] = useState<WellnessInsight | null>(null);
   const { isLoading, stats, loadAll } = useProgress();
   const { moodEntries, journalEntries } = (stats || {}) as any;
+  // defensive aliases used below to avoid ReferenceError when stats is undefined
+  const moodData: MoodData[] = (moodEntries || []).map((m: any) => ({
+    date: m.createdAt || m.created_at || m.date || new Date().toISOString(),
+    mood: m.moodLevel ?? m.mood_level ?? m.mood ?? 0,
+    note: m.note || m.content || undefined,
+  }));
+  const journalCount = stats?.totalJournalEntries ?? (journalEntries || []).length ?? 0;
   const { toast } = useToast();
 
   useEffect(() => {
@@ -64,7 +71,7 @@ export default function ProgressDashboard() {
   const renderMoodChart = () => {
     const maxMood = 5;
     const chartHeight = 120;
-    const displayData = moodData.slice(-7); // last 7 entries
+  const displayData = moodData.slice(-7); // last 7 entries
 
     if (displayData.length === 0) {
       return (

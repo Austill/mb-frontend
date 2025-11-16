@@ -9,12 +9,7 @@ import { cn } from "@/lib/utils";
 import { Calendar, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useMood from "@/hooks/useMood";
-import type { CreateMoodEntryData } from "@/services/moodService";
-
-interface MoodEntry extends APIMoodEntry {
-  dateObj: Date;
-  mood: number;
-}
+import type { CreateMoodEntryData, MoodEntry as APIMoodEntry } from "@/services/moodService";
 
 const moodEmojis = [
   { value: 1, emoji: "😢", label: "Very Low", color: "hsl(var(--mood-poor))" },
@@ -39,7 +34,7 @@ const commonTriggers = [
 
 export default function MoodTracker() {
   const { toast } = useToast();
-  const [currentMood, setCurrentMood] = useState<[number]>([3]);
+  const [currentMood, setCurrentMood] = useState<number[]>([3]);
   const [note, setNote] = useState("");
   const [selectedTriggers, setSelectedTriggers] = useState<string[]>([]);
   const [customTrigger, setCustomTrigger] = useState("");
@@ -48,12 +43,9 @@ export default function MoodTracker() {
   const [animatingMood, setAnimatingMood] = useState<number | null>(null);
   
 
-  useEffect(() => {
-    // initial load handled by hook, ensure UI sync
-    if (!todayEntry && !recentEntries) {
-      load();
-    }
-  }, []);
+  // useMood hook performs initial load; remove redundant/incorrect guard here
+  // (previously `!recentEntries` was always false because [] is truthy,
+  // which could prevent a load in some render orders)
 
   // sync local fields when hook's todayEntry changes
   useEffect(() => {
@@ -285,9 +277,9 @@ export default function MoodTracker() {
                 <div className="text-3xl">{entry.emoji}</div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-[hsl(var(--wellness-primary))]">
-                      {moodEmojis.find((m) => m.value === entry.mood)?.label}
-                    </span>
+                      <span className="font-semibold text-[hsl(var(--wellness-primary))]">
+                        {moodEmojis.find((m) => m.value === (entry.moodLevel ?? entry.mood ?? 0))?.label}
+                      </span>
                     <span className="text-sm text-muted-foreground bg-[hsl(var(--wellness-secondary)/0.1)] px-2 py-1 rounded-full">
                       {entry.dateObj.toLocaleDateString("en-US", {
                         month: "short",
