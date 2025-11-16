@@ -9,7 +9,12 @@ import { cn } from "@/lib/utils";
 import { Calendar, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useMood from "@/hooks/useMood";
-import type { CreateMoodEntryData, MoodEntry as APIMoodEntry } from "@/services/moodService";
+import type { CreateMoodEntryData } from "@/services/moodService";
+
+interface MoodEntry extends APIMoodEntry {
+  dateObj: Date;
+  mood: number;
+}
 
 const moodEmojis = [
   { value: 1, emoji: "😢", label: "Very Low", color: "hsl(var(--mood-poor))" },
@@ -34,7 +39,7 @@ const commonTriggers = [
 
 export default function MoodTracker() {
   const { toast } = useToast();
-  const [currentMood, setCurrentMood] = useState<number[]>([3]);
+  const [currentMood, setCurrentMood] = useState<[number]>([3]);
   const [note, setNote] = useState("");
   const [selectedTriggers, setSelectedTriggers] = useState<string[]>([]);
   const [customTrigger, setCustomTrigger] = useState("");

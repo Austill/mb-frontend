@@ -35,15 +35,9 @@ export default function useJournal() {
         setEntries((prev) => [temp, ...prev]);
         const saved = await apiCreateJournalEntry(payload as any);
         // replace temp
-          setEntries((prev) => [saved, ...prev.filter((e) => e.id !== tempId && e.id !== saved.id)]);
-          // ensure server-authoritative ordering/state after optimistic update
-          try {
-            await load();
-          } catch (e) {
-            // ignore — we already showed success and have optimistic state
-          }
-          toast({ title: 'Success', description: 'Journal entry saved' });
-          return saved;
+        setEntries((prev) => [saved, ...prev.filter((e) => e.id !== tempId && e.id !== saved.id)]);
+        toast({ title: 'Success', description: 'Journal entry saved' });
+        return saved;
       } catch (err) {
         console.error('createEntry error', err);
         toast({ title: 'Error', description: 'Failed to save journal entry', variant: 'destructive' });
