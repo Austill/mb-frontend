@@ -16,35 +16,37 @@ const normalizeJournal = (raw: any): JournalEntry => {
   } as any;
 };
 
-// GET /journal/entries
+// GET /journal
 export const getJournalEntries = async (): Promise<JournalEntry[]> => {
-  const response = await api.get('/journal/entries');
+  const response = await api.get('/journal');
   // backend may return { entries: [...] } or just an array
   const data = response.data;
   const items = Array.isArray(data) ? data : data?.entries || [];
   return items.map((item: any) => normalizeJournal(item));
 };
 
-// POST /journal/entries
+// POST /journal
 export const createJournalEntry = async (entry: {
   title: string;
   content: string;
   isPrivate: boolean;
 }): Promise<JournalEntry> => {
-  const response = await api.post('/journal/entries', entry);
+  const response = await api.post('/journal', entry);
   // backend may return { entry } or the created object directly
   const data = response.data;
   const raw = data?.entry || data;
   return normalizeJournal(raw);
 };
 
-// GET /journal/entries/:id
+// GET /journal/:id
 export const getJournalEntry = async (id: string): Promise<JournalEntry> => {
-  const response = await api.get(`/journal/entries/${id}`);
-  return normalizeJournal(response.data);
+  const response = await api.get(`/journal/${id}`);
+  const data = response.data;
+  const raw = data?.entry || data;
+  return normalizeJournal(raw as any);
 };
 
-// PUT /journal/entries/:id
+// PUT /journal/:id
 export const updateJournalEntry = async (
   id: string,
   data: Partial<{ title: string; content: string; isPrivate: boolean }>
@@ -54,11 +56,13 @@ export const updateJournalEntry = async (
   if (typeof data.isPrivate === 'boolean') {
     payload.isPrivate = data.isPrivate;
   }
-  const response = await api.put(`/journal/entries/${id}`, payload);
-  return normalizeJournal(response.data);
+  const response = await api.put(`/journal/${id}`, payload);
+  const res = response.data;
+  const raw = res?.entry || res;
+  return normalizeJournal(raw as any);
 };
 
-// DELETE /journal/entries/:id
+// DELETE /journal/:id
 export const deleteJournalEntry = async (id: string): Promise<void> => {
-  await api.delete(`/journal/entries/${id}`);
+  await api.delete(`/journal/${id}`);
 };

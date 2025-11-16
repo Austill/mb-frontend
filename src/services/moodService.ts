@@ -50,9 +50,11 @@ const normalizeMood = (raw: any): MoodEntry => {
 
 // Create a new mood entry
 export const createMoodEntry = async (data: CreateMoodEntryData): Promise<MoodEntry> => {
-  const response = await api.post('/mood/entries', data);
-  // backend returns { message, entry }
-  return normalizeMood(response.data.entry);
+  const response = await api.post('/mood', data);
+  // backend may return { entry } or the created object directly
+  const payload = response.data;
+  const raw = payload?.entry || payload;
+  return normalizeMood(raw);
 };
 
 // Get mood entries with pagination and filtering
@@ -66,7 +68,7 @@ export const getMoodEntries = async (params?: {
   limit: number;
   offset: number;
 }> => {
-  const response = await api.get('/mood/entries', { params });
+  const response = await api.get('/mood', { params });
   const payload = response.data;
   return {
     entries: (payload.entries || []).map((e: any) => normalizeMood(e)),
@@ -78,8 +80,10 @@ export const getMoodEntries = async (params?: {
 
 // Get a specific mood entry
 export const getMoodEntry = async (entryId: string): Promise<MoodEntry> => {
-  const response = await api.get(`/mood/entries/${entryId}`);
-  return normalizeMood(response.data.entry);
+  const response = await api.get(`/mood/${entryId}`);
+  const payload = response.data;
+  const raw = payload?.entry || payload;
+  return normalizeMood(raw);
 };
 
 // Update a mood entry
@@ -87,13 +91,15 @@ export const updateMoodEntry = async (
   entryId: string,
   data: UpdateMoodEntryData
 ): Promise<MoodEntry> => {
-  const response = await api.put(`/mood/entries/${entryId}`, data);
-  return normalizeMood(response.data.entry);
+  const response = await api.put(`/mood/${entryId}`, data);
+  const payload = response.data;
+  const raw = payload?.entry || payload;
+  return normalizeMood(raw);
 };
 
 // Delete a mood entry
 export const deleteMoodEntry = async (entryId: string): Promise<void> => {
-  await api.delete(`/mood/entries/${entryId}`);
+  await api.delete(`/mood/${entryId}`);
 };
 
 // Get mood statistics
